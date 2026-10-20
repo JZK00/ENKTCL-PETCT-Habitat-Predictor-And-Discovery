@@ -12,7 +12,9 @@ Habitat 1 was a small metabolically active, heterogeneous compartment (5.4% of t
 
 `habitat_reference.py` is a small **runnable reference of the *descriptor-level clustering and frozen assignment* stage**, plus a synthetic-data demo. It fits a `StandardScaler` and 3-cluster K-means on **training descriptors only**, saves both models, assigns held-out supervoxels without refitting, and exports voxel-weighted patient habitat fractions. Tests are in `tests/`.
 
-**Important scope:** This repository does **not** yet contain the original DICOM/NIfTI preprocessing and segmentation, local entropy/supervoxel extraction, PyRadiomics/ComBat pipeline, ICC screening, SHAP-XGBoost trained model, nomogram, figures, data, or the original fitted model weights. The reference code therefore **cannot reproduce the manuscript AUCs or RadScoreHabitat**. Do not interpret its demo as a clinical predictor. The original habitat workflow builds on [HABIT](https://github.com/lichao312214129/HABIT).
+**Important scope:** This repository does **not** yet contain the original DICOM/NIfTI preprocessing and segmentation, local entropy/supervoxel extraction, PyRadiomics/ComBat pipeline, ICC screening, SHAP-XGBoost trained model, nomogram, figures, data, or the original fitted model weights. The reference code therefore **cannot reproduce the manuscript AUCs or RadScoreHabitat**. Do not interpret its demo as a clinical predictor. 
+
+The original habitat workflow builds on [HABIT](https://github.com/lichao312214129/HABIT).
 
 ## Installation and quick start
 
