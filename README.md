@@ -42,6 +42,33 @@ python habitat_reference.py predict --csv validation_descriptors.csv --model out
 
 The training command displays the original-scale K-means centroids and suggested Habitat 1/2/3 correspondence. **Check this correspondence against the study's original centroid profiles.** Labels are arbitrary in K-means; if needed, manually specify the validated mapping at training time, e.g. `--mapping 0:2,1:1,2:3`. A different mapping changes habitat IDs and must not be silently substituted for the reported study. The validation set must not be used to choose the number of clusters, centroids, scaler, or mapping.
 
+## Extract features (by using PyRadiomics)
+
+```bash
+python habitat_radiomics_xgboost.py extract --manifest train_manifest.csv --out train_radiomics.csv
+python habitat_radiomics_xgboost.py extract --manifest external_manifest.csv --out external_radiomics.csv
+```
+
+For every habitat and PET/CT modality, the example calculates Original-image first-order and texture features (GLCM, GLRLM, GLSZM, GLDM, NGTDM). Shape features are calculated once from PET and the same mask. Every output row is one patient, with columns such as `PET_H1_original_firstorder_Mean`, `CT_H2_original_glcm_Contrast`. Habitats with fewer than 10 voxels are skipped, yielding missing feature values.
+
+Default fixed bin widths are **PET SUV = 0.5** and **CT HU = 25**, as **illustrative settings only**, not the final verified settings. Adjust with `--pet-bin-width` / `--ct-bin-width`. No normalization or resampling is performed inside PyRadiomics. Match the manuscript's voxel spacing, binning, filtering, preprocessing, and extraction version before scientific use. For fair external validation, PET/CT and masks must have been aligned using a predefined, consistent preprocessing pipeline.
+
+## Train XGBoost using training patients only
+
+```bash
+python habitat_radiomics_xgboost.py train --train-csv train_radiomics.csv --valid-csv external_radiomics.csv --outdir results --label-col label --top-k 30
+```
+
+The script excludes patient IDs and mask volume counts from predictors, drops all-missing/constant columns on the *training* cohort, fits median imputation and univariate top-k feature selection **only on training patients**, and then fits XGBoost. It applies this frozen pipeline to external data; it prevents overlapping patient IDs between cohorts.
+
+Outputs: `results/model.joblib`, `feature_importance.csv`, `train_predictions.csv`, `validation_predictions.csv`, `metrics.json` (binary AUC, accuracy at illustrative 0.5 threshold). XGBoost feature importances are descriptive, not SHAP explanations. Model scores are uncalibrated probabilities and should not be interpreted as validated clinical risk estimates.
+
+## Predict new patient features
+
+```bash
+python habitat_radiomics_xgboost.py predict --csv new_radiomics.csv --model results/model.joblib --out results/new_predictions.csv
+```
+
 ## Reproducibility and data availability
 
 Clinical PET/CT and follow-up records are not distributed here because of patient privacy and institutional restrictions.
